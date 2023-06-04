@@ -1,12 +1,15 @@
+import os
 import pinecone
 
+from dotenv import load_dotenv
 from langchain.document_loaders import DirectoryLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.embeddings import SentenceTransformerEmbeddings
 from langchain.vectorstores import Pinecone
 
+
 # Loading documents from a directory with LangChain
-DIRECTORY = "./content/data/"
+DIRECTORY = "./content/data"
 
 
 def load_docs(directory: str):
@@ -32,12 +35,19 @@ docs = split_docs(documents)
 # Creating embeddings
 embeddings = SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2")
 
+# Load environment variables from .env file
+load_dotenv()
 
-pinecone.init(
-    api_key="b325823f-1bb4-4dea-a0fc-868f6b20d80b",
-    environment="us-west4-gcp-free",
-)
-index_name = "interactive-chatbot"
+# Access the environment variables
+openai_api_key = os.getenv("OPENAI_API_KEY")
+pinecone_api_key = os.getenv("PINECONE_API_KEY")
+pinecone_environment = os.getenv("PINECONE_ENVIRONMENT")
+pinecone_index_name = os.getenv("PINECONE_INDEX_NAME")
+
+# Initialize Pinecone with environment variables
+pinecone.init(api_key=pinecone_api_key, environment=pinecone_environment)
+index_name = pinecone_index_name
+
 index = Pinecone.from_documents(docs, embeddings, index_name=index_name)
 
 

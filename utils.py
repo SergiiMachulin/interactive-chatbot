@@ -1,21 +1,28 @@
-from sentence_transformers import SentenceTransformer
 import pinecone
 import openai
 import streamlit as st
+import os
 
-openai.api_key = "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"
+from sentence_transformers import SentenceTransformer
+from dotenv import load_dotenv
+
+
+load_dotenv()
+
+openai.api_key = os.getenv("OPENAI_API_KEY")
+pinecone_api_key = os.getenv("PINECONE_API_KEY")
+pinecone_environment = os.getenv("PINECONE_ENVIRONMENT")
+index_name = os.getenv("PINECONE_INDEX_NAME")
+
 model = SentenceTransformer("all-MiniLM-L6-v2")
 
-pinecone.init(
-    api_key="b325823f-1bb4-4dea-a0fc-868f6b20d80b",
-    environment="us-west4-gcp-free",
-)
+pinecone.init(api_key=pinecone_api_key, environment=pinecone_environment)
 
-index = pinecone.Index("interactive-chatbot")
+index = pinecone.Index(index_name)
 
 
-def find_match(input):
-    input_em = model.encode(input).tolist()
+def find_match(user_input):
+    input_em = model.encode(user_input).tolist()
     result = index.query(input_em, top_k=2, includeMetadata=True)
     return (
         result["matches"][0]["metadata"]["text"]
@@ -27,7 +34,10 @@ def find_match(input):
 def query_refiner(conversation, query):
     response = openai.Completion.create(
         model="text-davinci-003",
-        prompt=f"Given the following user query and conversation log, formulate a question that would be the most relevant to provide the user with an answer from a knowledge base.\n\nCONVERSATION LOG: \n{conversation}\n\nQuery: {query}\n\nRefined Query:",
+        prompt=f"Given the following user query and conversation log, formulate"
+        f" a question that would be the most relevant to provide the user with "
+        f"an answer from a knowledge base.\n\nCONVERSATION LOG: "
+        f"\n{conversation}\n\nQuery: {query}\n\nRefined Query:",
         temperature=0.7,
         max_tokens=256,
         top_p=1,
