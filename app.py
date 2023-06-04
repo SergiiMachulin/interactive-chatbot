@@ -1,9 +1,8 @@
 import datetime
-import streamlit as st
 
-from langchain.chat_models import ChatOpenAI
 from langchain.chains import ConversationChain
 from langchain.chains.conversation.memory import ConversationBufferWindowMemory
+from langchain.chat_models import ChatOpenAI
 from langchain.prompts import (
     SystemMessagePromptTemplate,
     HumanMessagePromptTemplate,
@@ -11,8 +10,8 @@ from langchain.prompts import (
     MessagesPlaceholder,
 )
 from streamlit_chat import message
-from utils import *
 
+from utils import *
 
 load_dotenv()
 
@@ -41,12 +40,13 @@ if "buffer_memory" not in st.session_state:
 actual_datetime = datetime.datetime.now().strftime("%H:%M:%S %d-%m-%Y")
 
 system_msg_template = SystemMessagePromptTemplate.from_template(
-    template=f""" You are a helpful assistant answer the question as 
-    truthfully as possible using the provided context. If you don't have 
-    enough information to answer the question or you don't find necessary 
-    information, say only 'Питаю менеджера' and don't give any other 
-    information in your response. Use {actual_datetime} as today time and 
-    day for answering questions connected with schedule, date or time."""
+    template=f""" You are a helpful shop assistant that can answer the 
+    question as truthfully as possible using the provided context. If you 
+    don't have enough information to answer the question or you don't find 
+    complete information, always say only 'Питаю менеджера' and nothing 
+    more. Use {actual_datetime} as today time and date for answering 
+    questions connected with calculation of the day of the week when shop 
+    works, or providing the schedule of shops based on the time or date."""
 )
 
 human_msg_template = HumanMessagePromptTemplate.from_template(
@@ -68,9 +68,8 @@ conversation = ConversationChain(
     verbose=True,
 )
 
-# container for chat history
+
 response_container = st.container()
-# container for text box
 textcontainer = st.container()
 
 with textcontainer:
@@ -85,6 +84,7 @@ with textcontainer:
             )
         st.session_state.requests.append(query)
         st.session_state.responses.append(response)
+
 with response_container:
     if st.session_state["responses"]:
         for i in range(len(st.session_state["responses"])):

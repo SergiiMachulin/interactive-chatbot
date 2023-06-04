@@ -8,21 +8,21 @@ from langchain.embeddings import SentenceTransformerEmbeddings
 from langchain.vectorstores import Pinecone
 
 
-# Loading documents from a directory with LangChain
 DIRECTORY = "./content/data"
 
 
-def load_docs(directory: str):
+# Loading documents from a directory with LangChain
+def load_docs(directory: str) -> list:
     loader = DirectoryLoader(directory)
     documents = loader.load()
     return documents
 
 
-documents = load_docs(DIRECTORY)
+current_documents = load_docs(DIRECTORY)
 
 
 # Splitting documents
-def split_docs(documents, chunk_size=500, chunk_overlap=20):
+def split_docs(documents: list, chunk_size=500, chunk_overlap=20) -> list:
     text_splitter = RecursiveCharacterTextSplitter(
         chunk_size=chunk_size, chunk_overlap=chunk_overlap
     )
@@ -30,7 +30,7 @@ def split_docs(documents, chunk_size=500, chunk_overlap=20):
     return docs
 
 
-docs = split_docs(documents)
+split_current_docs = split_docs(current_documents)
 
 # Creating embeddings
 embeddings = SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2")
@@ -48,10 +48,19 @@ pinecone_index_name = os.getenv("PINECONE_INDEX_NAME")
 pinecone.init(api_key=pinecone_api_key, environment=pinecone_environment)
 index_name = pinecone_index_name
 
-index = Pinecone.from_documents(docs, embeddings, index_name=index_name)
+index = Pinecone.from_documents(
+    split_current_docs, embeddings, index_name=index_name
+)
 
 
-def get_similar_docs(query, k=1, score=False):
+# To delete all data from Pinecone - uncomment 2 lines below & comment line above
+
+# index = pinecone.Index(index_name=index_name)
+# index.delete(deleteAll="true", namespace="")
+
+
+# Tracking the Conversation
+def get_similar_docs(query: str, k=1, score=False) -> list:
     if score:
         similar_docs = index.similarity_search_with_score(query, k=k)
     else:
