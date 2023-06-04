@@ -27,7 +27,7 @@ if "requests" not in st.session_state:
     st.session_state["requests"] = []
 
 llm = ChatOpenAI(
-    temperature=0.2,
+    # temperature=0.2,
     model_name="gpt-3.5-turbo",
     openai_api_key=openai.api_key,
 )
@@ -40,13 +40,15 @@ if "buffer_memory" not in st.session_state:
 actual_datetime = datetime.datetime.now().strftime("%H:%M:%S %d-%m-%Y")
 
 system_msg_template = SystemMessagePromptTemplate.from_template(
-    template=f""" You are a helpful shop assistant that can answer the 
-    question as truthfully as possible using the provided context. If you 
-    don't have enough information to answer the question or you don't find 
-    complete information, always say only 'Питаю менеджера' and nothing 
-    more. Use {actual_datetime} as today time and date for answering 
-    questions connected with calculation of the day of the week when shop 
-    works, or providing the schedule of shops based on the time or date."""
+    template=f""" You are a helpful assistant of the shop "Техно Їжак" that 
+    can answer the question as truthfully as possible using the provided 
+    context. If you don't have enough information to answer the question say 
+    only 'Питаю менеджера' or if the information is absent in the context 
+    say only 'Питаю менеджера'. Don't provide any information if you are not 
+    sure. Use {actual_datetime} as today time and date and calculate 
+    necessary day of the week from it for answering questions connected with 
+    finding of the day of the week when sales points and shops "Наші 
+    магазини" of "Техно Їжак" work."""
 )
 
 human_msg_template = HumanMessagePromptTemplate.from_template(
