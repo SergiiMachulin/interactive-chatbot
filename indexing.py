@@ -61,8 +61,7 @@ index = Pinecone.from_documents(
 
 # Tracking the Conversation
 def get_similar_docs(query: str, k=1, score=False) -> list:
-    if score:
-        similar_docs = index.similarity_search_with_score(query, k=k)
-    else:
+    if not score:
         similar_docs = index.similarity_search(query, k=k)
+    similar_docs = index.similarity_search_with_score(query, k=k)
     return similar_docs
